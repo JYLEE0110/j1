@@ -1,6 +1,8 @@
 package org.zerock.j1.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -9,6 +11,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.zerock.j1.domain.Todo;
 import org.zerock.j1.dto.PageResponseDTO;
 import org.zerock.j1.dto.TodoDTO;
@@ -29,6 +33,7 @@ public class TodoServiceImpl implements TodoService{
     @Override
     public PageResponseDTO<TodoDTO> getList() {
 
+        // page 0 => limit 0, 20 / page 1 => limit 20, 20
         Pageable pageable = PageRequest.of(0, 20, Sort.by("tno").descending());
 
         Page<Todo> result = todoRepository.findAll(pageable);
@@ -57,5 +62,37 @@ public class TodoServiceImpl implements TodoService{
         /* Entity를 다시 DTO로 반환 => TodoDTO(tno, title) 반환*/
         return modelMapper.map(result,TodoDTO.class);
     }
-    
+
+    @Override
+    public TodoDTO getOne(Long tno) {
+
+        // Null일떄 대비해서 Optional
+        Optional<Todo> result = todoRepository.findById(tno);
+
+        Todo todo = result.orElseThrow();
+
+        TodoDTO dto = modelMapper.map(todo,TodoDTO.class);
+
+        return dto;
+
+    }
+
+    @Override
+    public void remove(Long tno) {
+        todoRepository.deleteById(tno);
+    }
+
+    @Override
+    public void modify(TodoDTO todoDTO) {
+
+        Optional<Todo> result = todoRepository.findById(todoDTO.getTno());
+
+        Todo todo = result.orElseThrow();
+
+        todo.changeTitle(todoDTO.getTitle());
+
+        todoRepository.save(todo);
+
+    }
+
 }

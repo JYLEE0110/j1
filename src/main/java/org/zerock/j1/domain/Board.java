@@ -12,30 +12,31 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-// setter는 웬만하면 쓰지않는다.
-// index도 잡아 줄 수 있다.
-
 @Entity
-@Table(name="tbl_todo2")
+@Table(name = "t_board")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 @Getter
-public class Todo {
+@ToString
+public class Board extends BaseEntity {
     
-    // Id는 객체 타입 => persistence Context에서 Hash / equals로 작동하기때문
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long tno;
+    private Long bno;
 
-    @Column(length = 300, nullable = false)
+    @Column(length = 200, nullable = false)
     private String title;
 
+    @Column(length = 1000, nullable = false)
+    private String content;
+
+    @Column(length = 50, nullable = false)
+    private String writer;
+
+    // 수정 시 Setter가 아닌 다른 메소드로 선언 
     public void changeTitle(String title){
-
         this.title = title;
-
     }
 
 }

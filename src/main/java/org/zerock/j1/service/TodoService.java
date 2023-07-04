@@ -15,5 +15,11 @@ public interface TodoService {
     // save하면 return타입이 Todo다.
     TodoDTO register(TodoDTO dto);
 
+    TodoDTO getOne(Long tno);
+
+    void remove(Long tno);
+
+    void modify(TodoDTO todoDTO);
+
     
 }
