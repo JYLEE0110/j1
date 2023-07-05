@@ -30,7 +30,5 @@ public class Sample {
 
     private String addr;
     
-    private String zipCode;
-    
     private String city;
 }
