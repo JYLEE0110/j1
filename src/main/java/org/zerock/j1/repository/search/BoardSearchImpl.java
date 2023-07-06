@@ -10,9 +10,13 @@ import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
 import org.zerock.j1.domain.Board;
 import org.zerock.j1.domain.QBoard;
 import org.zerock.j1.domain.QReply;
+import org.zerock.j1.dto.BoardListRcntDTO;
+import org.zerock.j1.dto.PageRequestDTO;
+import org.zerock.j1.dto.PageResponseDTO;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
 
 import lombok.extern.log4j.Log4j2;
@@ -131,6 +135,69 @@ public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardS
         log.info("count: " + count);
 
         return new PageImpl<>(arrList, pageable, count);
+
+    }
+
+    // 검색 / 페이지 리스트 최종
+    @Override
+    public PageResponseDTO<BoardListRcntDTO> searchDTORcnt(PageRequestDTO requestDTO) {
+
+        Pageable pageable = makePageable(requestDTO);
+
+        QBoard board = QBoard.board;
+        QReply reply = QReply.reply;
+
+        // Board와 Reply Join 처리
+        JPQLQuery<Board> query = from(board);
+        query.leftJoin(reply).on(reply.board.eq(board));
+
+        String keyword = requestDTO.getKeyword();
+        String searchType = requestDTO.getType();
+
+        // 검색 조건
+        if (keyword != null && searchType != null) {
+
+            // tc->[t,c]
+            String[] searchArr = searchType.split("");
+
+            // 연산자 우선순위( ) 쓰려고 BooleanBuilder
+            BooleanBuilder searchBuilder = new BooleanBuilder();
+
+            for (String type : searchArr) {
+
+                switch (type) {
+                    case "t" -> searchBuilder.or(board.title.contains(keyword));
+                    case "c" -> searchBuilder.or(board.content.contains(keyword));
+                    case "w" -> searchBuilder.or(board.writer.contains(keyword));
+
+                }// end for
+                query.where(searchBuilder);
+
+            }
+        }
+
+        // paging 처리
+        this.getQuerydsl().applyPagination(pageable, query);
+        // join결과를 board(객체)로 grouping
+        query.groupBy(board);
+
+        // modelMapping 안쓰고 Projections로 한번에 해결
+        JPQLQuery<BoardListRcntDTO> listQuery = query.select(Projections.bean(BoardListRcntDTO.class, 
+            board.bno, 
+            board.title, 
+            board.writer,
+            reply.countDistinct().as("replyCount")));
+        
+        List<BoardListRcntDTO> list = listQuery.fetch();
+
+        log.info("--------------------");
+        log.info(list);
+
+        // 조인이 들어가서 비효율적
+        long totalCount = listQuery.fetchCount();
+
+        //builder로 빼는게 효율적
+        return new PageResponseDTO<>(list, totalCount, requestDTO) ;
 
     }
 
