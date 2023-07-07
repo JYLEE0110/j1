@@ -25,12 +25,23 @@ public class PageRequestDTO {
 
     }
 
+    // setter로 탐
     public PageRequestDTO(int page, int size, String type, String keyword) {
 
         this.page = page <= 0 ? 1 : page;
         this.size = size < 0 || size >= 100 ? 10 : size;
         this.type = type;
         this.keyword = keyword;
+    }
+
+    public void setPage(int page){
+        this.page = page <= 0 ? 1 : page;
+    }
+
+    public void setSize(int size){
+
+        this.size = size < 0 || size >= 100 ? 10 : size;
+
     }
 
 }
