@@ -15,6 +15,7 @@ public class RootConfig {
         modelMapper.getConfiguration()
                 .setFieldMatchingEnabled(true)
                 .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE)
+                // LOOSE => ReplyEntity안에 ManyTo one 인Board를 매칭 시켜준다.
                 .setMatchingStrategy(MatchingStrategies.LOOSE);
 
         return modelMapper;

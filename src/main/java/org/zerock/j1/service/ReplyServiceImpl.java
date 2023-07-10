@@ -1,6 +1,7 @@
 package org.zerock.j1.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -30,6 +31,7 @@ public class ReplyServiceImpl implements ReplyService {
     @Override
     public PageResponseDTO<ReplyDTO> list(ReplyPageRequestDTO requestDTO) {
 
+        // 댓글은 검색기능X quertDSL X
         // 댓글 마지막페이지 인지 확인
         boolean last = requestDTO.isLast();
 
@@ -39,8 +41,10 @@ public class ReplyServiceImpl implements ReplyService {
         if(last){
 
             long totalCount = replyRepository.getCountBoard(requestDTO.getBno());
-
             pageNum = (int)(Math.ceil(totalCount / (double)requestDTO.getSize()));
+
+            // 댓글이 없을때 오류 처리
+            pageNum = pageNum <= 0 ? 1 :pageNum;
 
         }
 
@@ -62,6 +66,60 @@ public class ReplyServiceImpl implements ReplyService {
         responseDTO.setPage(pageNum);
 
         return responseDTO;
+    }
+
+    @Override
+    public Long register(ReplyDTO replyDTO) {
+
+        Reply reply = modelMapper.map(replyDTO, Reply.class);
+
+        log.info("reply...");
+        log.info(reply);
+
+        // 댓글 등록 후 몇 번째 댓글이 등록되었는지 확인
+        long newRno = replyRepository.save(reply).getRno();
+
+        return newRno;
+
+    }
+
+    @Override
+    public ReplyDTO read(Long rno) {
+
+        Optional<Reply> result = replyRepository.findById(rno);
+
+        Reply reply =result.orElseThrow();
+
+        return modelMapper.map(reply, ReplyDTO.class);
+
+    }
+
+    @Override
+    public void remove(Long rno) {
+
+        Optional<Reply> result = replyRepository.findById(rno);
+
+        Reply reply = result.orElseThrow();
+
+        reply.changeText("해당 댓글은 삭제되었습니다.");
+        reply.changeFile(null);
+
+        replyRepository.save(reply);
+
+    }
+
+    @Override
+    public void modify(ReplyDTO replyDTO) {
+
+        Optional<Reply> result = replyRepository.findById(replyDTO.getRno());
+
+        Reply reply = result.orElseThrow();
+
+        reply.changeText(replyDTO.getReplyText());
+        reply.changeFile(replyDTO.getReplyFile());
+
+        replyRepository.save(reply);
+
     }
     
 }

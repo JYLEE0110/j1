@@ -11,5 +11,13 @@ public interface ReplyService {
 
     // 결과값은 항상 PageResponseDTO
     PageResponseDTO<ReplyDTO> list(ReplyPageRequestDTO requestDTO);
+    
+    Long register(ReplyDTO replyDTO);
+
+    ReplyDTO read(Long rno);
+
+    void remove(Long rno);
+
+    void modify(ReplyDTO replyDTO);
 
 }

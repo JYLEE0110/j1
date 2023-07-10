@@ -22,7 +22,7 @@ public class ReplyPageRequestDTO extends PageRequestDTO {
 
     // size는 고정이라 Setter는 주면 안된다. => 일단 해놓음?
     @Builder.Default
-    private int size = 50;
+    private int size = 20;
     
     private boolean last;
 }

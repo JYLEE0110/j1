@@ -39,5 +39,13 @@ public class Reply {
     // 연관관계를 걸때는 기본 LAZY를 걸고 필요한 순간에만 호출하게 설계한다. 
     @ManyToOne(fetch = FetchType.LAZY)
     private Board board;
+
+    public void changeText(String text){
+        this.replyText = text;
+    }
+
+    public void changeFile(String fileName){
+        this.replyFile = fileName;
+    }
     
 }
